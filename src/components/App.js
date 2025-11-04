@@ -3,23 +3,32 @@ import './../styles/App.css';
 
 const App = () => {
   const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-
     fetch("https://dummyjson.com/products")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((json) => setData(json))
-      .catch((err) => console.error("Fetch error:", err));
+      .catch((err) => setError(err.message));
   }, []);
 
   return (
     <div>
       {/* Do not remove the main div */}
-      <h1>Data Fetcher</h1>
-      {!data ? (
-        <p>Loading...</p>
+      {error ? (
+        <p>An error occurred: {error}</p>
+      ) : data ? (
+        <>
+          <h1>Data Fetched from API</h1>
+          <pre>{JSON.stringify(data, null, 2)}</pre>
+        </>
       ) : (
-        <pre>{JSON.stringify(data, null, 2)}</pre>
+        <p>Loading...</p>
       )}
     </div>
   );
